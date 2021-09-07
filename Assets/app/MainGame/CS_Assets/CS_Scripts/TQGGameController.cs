@@ -537,7 +537,7 @@ namespace TriviaQuizGame
                 // Move the players object so that the current player is centered in the screen
                 if (players[currentPlayer].nameText && bonusObject.position.x != players[currentPlayer].nameText.transform.position.x)
                 {
-                    playersObject.anchoredPosition = new Vector2(Mathf.Lerp(playersObject.anchoredPosition.x, currentPlayer * -200 - 100, Time.deltaTime * 10), playersObject.anchoredPosition.y);
+                    playersObject.anchoredPosition = new Vector2(playersObject.anchoredPosition.x, Mathf.Lerp(playersObject.anchoredPosition.y, currentPlayer * 137, Time.deltaTime * 10));
                 }
 
                 // Make the score count up to its current value, for the current player
