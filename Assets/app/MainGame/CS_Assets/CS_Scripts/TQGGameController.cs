@@ -14,6 +14,7 @@ using System.Xml;
 using System.IO;
 using TriviaQuizGame.Types;
 using System.Collections.Generic;
+using GlobalSetting;
 
 namespace TriviaQuizGame
 {
@@ -33,6 +34,11 @@ namespace TriviaQuizGame
 
         // Holds the name of the category loaded into this quiz, if it exists
         internal string currentCategory;
+
+        public Sprite John = null;
+        public Sprite Jacky = null;
+        public Sprite Aries = null;
+        public Sprite Teresa = null;
 
         [Header("<Player Options>")]
         [Tooltip("A list of the players in the game. Each player can be assigned a name, a score text, lives and lives bar. You must have at least one player in the list in order to play the game. You don't need to assign all fields. For example, a player may have a name with no lives bar and it will work fine.")]
@@ -241,7 +247,7 @@ namespace TriviaQuizGame
         internal int indexB = 0;
 
         internal bool keyboardControls = false;
-        
+
         // This stat keeps track of the time if took from the start of the quiz to the end of the quiz (gameover or victory)
         internal DateTime startTime;
         internal TimeSpan playTime;
@@ -274,7 +280,7 @@ namespace TriviaQuizGame
 
             //Get the highscore for the player
 #if UNITY_5_3 || UNITY_5_3_OR_NEWER
-			highScore = PlayerPrefs.GetFloat(SceneManager.GetActiveScene().name + "HighScore", 0);
+            highScore = PlayerPrefs.GetFloat(SceneManager.GetActiveScene().name + "HighScore", 0);
 #else
             highScore = PlayerPrefs.GetFloat(Application.loadedLevelName + "HighScore", 0);
 #endif
@@ -332,7 +338,7 @@ namespace TriviaQuizGame
             }
 
             if (videoObject) videoObject.SetActive(false);
-            
+
             // Disable the button from the question, so that we don't accidentally try to open an image that isn't there
             if (questionObject.GetComponent<Button>()) questionObject.GetComponent<Button>().enabled = false;
 
@@ -396,6 +402,30 @@ namespace TriviaQuizGame
             {
                 // Start the game! Setup the question list ( shuffle it ) and ask the first question
                 StartCoroutine(StartGame());
+            }
+
+            for (int p = 0; p < GameController.playerName.Length; p++)
+            {
+                string oriName = GameController.playerName[p];
+                players[p].characterName = oriName;
+                players[p].name = GameController.playerNameMap[oriName];
+                players[p].nameText.GetComponent<Text>().text = GameController.playerNameMap[oriName];
+                Image avatar = players[p].nameText.parent.transform.GetChild(0).GetComponent<Image>();
+                switch (oriName)
+                {
+                    case "John":
+                        avatar.sprite = John;
+                        break;
+                    case "Jacky":
+                        avatar.sprite = Jacky;
+                        break;
+                    case "Aries":
+                        avatar.sprite = Aries;
+                        break;
+                    case "Teresa":
+                        avatar.sprite = Teresa;
+                        break;
+                }
             }
         }
 
@@ -784,11 +814,11 @@ namespace TriviaQuizGame
                         // If the question has a sound, activate the sound button so we can play it
                         if (questionObject.Find("ButtonPlaySound"))
                         {
-                            if ( questions[currentQuestion].sound != null && questions[currentQuestion].soundURL != String.Empty)
+                            if (questions[currentQuestion].sound != null && questions[currentQuestion].soundURL != String.Empty)
                             {
                                 StartCoroutine(LoadSoundFromURL(questions[currentQuestion].soundURL, questions[currentQuestion], null, null));
                             }
-                            else if (questions[currentQuestion].sound != null )
+                            else if (questions[currentQuestion].sound != null)
                             {
                                 // Activate the sound button, since it may have been hidden before
                                 questionObject.Find("ButtonPlaySound").gameObject.SetActive(true);
@@ -803,16 +833,16 @@ namespace TriviaQuizGame
                             }
                         }
 
-                        if ( questions[currentQuestion].image || questions[currentQuestion].imageURL != String.Empty )    // If we have a question image, display it. Otherwise, hide the image object
+                        if (questions[currentQuestion].image || questions[currentQuestion].imageURL != String.Empty)    // If we have a question image, display it. Otherwise, hide the image object
                         {
                             // Hide the video object
                             if (videoObject) videoObject.gameObject.SetActive(false);
 
                             // Unhide the image object
-                            if (imageObject )
+                            if (imageObject)
                             {
                                 // If we have an image URL, try to load it
-                                if ( questions[currentQuestion].imageURL != null && questions[currentQuestion].imageURL != String.Empty )
+                                if (questions[currentQuestion].imageURL != null && questions[currentQuestion].imageURL != String.Empty)
                                 {
                                     StartCoroutine(LoadImageFromURL(questions[currentQuestion].imageURL, imageObject.GetComponent<Image>(), true));
                                 }
@@ -860,7 +890,7 @@ namespace TriviaQuizGame
                             answerObject.Find("Text").GetComponent<Text>().text = "";
 
                             // Hide the answer outline
-                            if (answerObject.Find("Outline"))    answerObject.Find("Outline").GetComponent<Image>().enabled = false;
+                            if (answerObject.Find("Outline")) answerObject.Find("Outline").GetComponent<Image>().enabled = false;
 
                             // If the answer has an image, clear it and hide it
                             if (answerObject.Find("Image"))
@@ -1011,7 +1041,7 @@ namespace TriviaQuizGame
             if (askingQuestion == true)
             {
                 // If this is a multi-choice question, allow the player to choose more than one question before checking the result
-                if ( questions[currentQuestion].multiChoice == true )
+                if (questions[currentQuestion].multiChoice == true)
                 {
                     if (answerObjects[answerIndex].Find("Outline")) answerObjects[answerIndex].Find("Outline").GetComponent<Image>().enabled = !answerObjects[answerIndex].Find("Outline").GetComponent<Image>().enabled;
 
@@ -1043,7 +1073,7 @@ namespace TriviaQuizGame
                         {
                             if (answerObjects[index].GetComponent<Button>().IsInteractable() == true)
                             {
-                                if ( Application.isMobilePlatform == false && keyboardControls == true )    eventSystem.SetSelectedGameObject(answerObjects[index].gameObject);
+                                if (Application.isMobilePlatform == false && keyboardControls == true) eventSystem.SetSelectedGameObject(answerObjects[index].gameObject);
 
                                 break;
                             }
@@ -1167,7 +1197,7 @@ namespace TriviaQuizGame
                 // Disable the button so we can't press it again
                 answerObjects[answerIndex].GetComponent<Button>().interactable = false;
 
-                if ( questions[currentQuestion].answers[answerIndex].isCorrect == answerObjects[answerIndex].Find("Outline").GetComponent<Image>().enabled )
+                if (questions[currentQuestion].answers[answerIndex].isCorrect == answerObjects[answerIndex].Find("Outline").GetComponent<Image>().enabled)
                 {
                     // Play the animation Wrong
                     if (animationCorrect)
@@ -1195,7 +1225,7 @@ namespace TriviaQuizGame
                 }
             }
 
-            if (goodResult == true )
+            if (goodResult == true)
             {
                 // If we answered correctly this round, increase the question count for this bonus group
                 questionCount++;
@@ -1362,9 +1392,9 @@ namespace TriviaQuizGame
                 }
 
                 // If there is a followup image, display it
-                if (questions[currentQuestion].followupImage || questions[currentQuestion].followupImageURL != String.Empty )
+                if (questions[currentQuestion].followupImage || questions[currentQuestion].followupImageURL != String.Empty)
                 {
-                    if ( questions[currentQuestion].imageURL != null && questions[currentQuestion].followupImageURL != String.Empty )
+                    if (questions[currentQuestion].imageURL != null && questions[currentQuestion].followupImageURL != String.Empty)
                     {
                         StartCoroutine(LoadImageFromURL(questions[currentQuestion].followupImageURL, imageObject.GetComponent<Image>(), false));
                     }
@@ -1492,7 +1522,7 @@ namespace TriviaQuizGame
             // Stop any sounds playing, and reset the sound play time
             if (soundSource)
             {
-                if ( isGameOver == false ) soundSource.GetComponent<AudioSource>().Stop();
+                if (isGameOver == false) soundSource.GetComponent<AudioSource>().Stop();
 
                 soundPlayTime = 0;
             }
@@ -1673,7 +1703,7 @@ namespace TriviaQuizGame
 
                     //Register the new high score
 #if UNITY_5_3 || UNITY_5_3_OR_NEWER
-					PlayerPrefs.SetFloat(SceneManager.GetActiveScene().name + "HighScore", players[currentPlayer].score);
+                    PlayerPrefs.SetFloat(SceneManager.GetActiveScene().name + "HighScore", players[currentPlayer].score);
 #else
                     PlayerPrefs.SetFloat(Application.loadedLevelName + "HighScore", players[currentPlayer].score);
 #endif
@@ -1713,7 +1743,7 @@ namespace TriviaQuizGame
             if (victoryCanvas)
             {
                 //Show the victory screen
-                victoryCanvas.gameObject.SetActive(true);
+                // victoryCanvas.gameObject.SetActive(true);
 
                 // If we have a TextScore and TextHighScore objects, then we are using the single player victory canvas
                 if (victoryCanvas.Find("ScoreTexts/TextScore") && victoryCanvas.Find("ScoreTexts/TextHighScore"))
@@ -1728,7 +1758,7 @@ namespace TriviaQuizGame
 
                         //Register the new high score
 #if UNITY_5_3 || UNITY_5_3_OR_NEWER
-						PlayerPrefs.SetFloat(SceneManager.GetActiveScene().name + "HighScore", players[currentPlayer].score);
+                        PlayerPrefs.SetFloat(SceneManager.GetActiveScene().name + "HighScore", players[currentPlayer].score);
 #else
                         PlayerPrefs.SetFloat(Application.loadedLevelName + "HighScore", players[currentPlayer].score);
 #endif
@@ -1747,6 +1777,22 @@ namespace TriviaQuizGame
 
                     // Sort the players by the score they have, from highest to lowest
                     Array.Sort(players, delegate (Player x, Player y) { return y.score.CompareTo(x.score); });
+                    switch (players[0].characterName)
+                    {
+                        case "John":
+                            SceneManager.LoadScene("endgame_JOHN");
+                            break;
+                        case "Jacky":
+                            SceneManager.LoadScene("endgame_JC");
+                            break;
+                        case "Aries":
+                            SceneManager.LoadScene("endgame_A");
+                            break;
+                        case "Teresa":
+                            SceneManager.LoadScene("endgame_T");
+                            break;
+                    }
+
 
                     // Go through all the players and check if we have more than one winner
                     for (index = 0; index < numberOfPlayers; index++)
@@ -1833,7 +1879,7 @@ namespace TriviaQuizGame
         public void Restart()
         {
 #if UNITY_5_3 || UNITY_5_3_OR_NEWER
-			SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 #else
             Application.LoadLevel(Application.loadedLevelName);
 #endif
@@ -1845,7 +1891,7 @@ namespace TriviaQuizGame
         public void MainMenu()
         {
 #if UNITY_5_3 || UNITY_5_3_OR_NEWER
-			SceneManager.LoadScene(mainMenuLevelName);
+            SceneManager.LoadScene(mainMenuLevelName);
 #else
             Application.LoadLevel(mainMenuLevelName);
 #endif
@@ -1874,7 +1920,7 @@ namespace TriviaQuizGame
                 // Unhide the larger image canvas
                 largerImageCanvas.gameObject.SetActive(true);
 
-                if (questions[currentQuestion].image || questions[currentQuestion].imageURL != String.Empty )
+                if (questions[currentQuestion].image || questions[currentQuestion].imageURL != String.Empty)
                 {
                     // Hide the video object
                     largerImageCanvas.Find("Video").gameObject.SetActive(false);
@@ -2040,7 +2086,7 @@ namespace TriviaQuizGame
                 {
                     // Assign the question to the right slot in the game controller
                     if (XmlQuestion.Name == "Question") questionsTemp[questionIndex].question = XmlQuestion.InnerText;
-                    
+
                     // Assign the followup text, image, and sound slots in the game controller
                     if (XmlQuestion.Name == "Followup")
                     {
@@ -2051,7 +2097,7 @@ namespace TriviaQuizGame
                         if (XmlQuestion.Attributes.GetNamedItem("image") != null)
                         {
                             // If it's a URL, assign it to followupImageURL
-                            if ( XmlQuestion.Attributes.GetNamedItem("image").InnerText.Contains("http") )
+                            if (XmlQuestion.Attributes.GetNamedItem("image").InnerText.Contains("http"))
                             {
                                 questionsTemp[questionIndex].followupImageURL = XmlQuestion.Attributes.GetNamedItem("image").InnerText;
                             }
@@ -2080,7 +2126,7 @@ namespace TriviaQuizGame
                     if (XmlQuestion.Name == "Image")
                     {
                         // If it's a URL, assign it to imageURL
-                        if ( XmlQuestion.InnerText.Contains("http") )
+                        if (XmlQuestion.InnerText.Contains("http"))
                         {
                             questionsTemp[questionIndex].imageURL = XmlQuestion.InnerText;
                         }
@@ -2094,7 +2140,7 @@ namespace TriviaQuizGame
                     if (XmlQuestion.Name == "Sound")
                     {
                         // If it's a URL, assign it to soundURL
-                        if ( XmlQuestion.InnerText.Contains("http") )
+                        if (XmlQuestion.InnerText.Contains("http"))
                         {
                             questionsTemp[questionIndex].soundURL = XmlQuestion.InnerText;
                         }
@@ -2356,7 +2402,7 @@ namespace TriviaQuizGame
         /// </summary>
         public void PlayQuestionSound()
         {
-            if ( askingQuestion == true )
+            if (askingQuestion == true)
             {
                 // If there is a sound source tag and audio to play, play the sound from the audio source based on its tag
                 if (soundPlayTime <= 0 && soundSourceTag != string.Empty && questions[currentQuestion].sound)
@@ -2382,7 +2428,7 @@ namespace TriviaQuizGame
                 }
             }
         }
-        
+
 
         /// <summary>
         /// Plays the sound attached to this answer based on its index
@@ -2436,7 +2482,7 @@ namespace TriviaQuizGame
         /// <param name="targetImage"></param>
         /// <param name="enlargeButton"></param>
         /// <returns></returns>
-        public IEnumerator LoadImageFromURL( string imageURL, Image targetImage, bool enlargeButton)
+        public IEnumerator LoadImageFromURL(string imageURL, Image targetImage, bool enlargeButton)
         {
             // Stop the timer while we load the image
             timerRunning = false;
@@ -2457,7 +2503,7 @@ namespace TriviaQuizGame
             targetImage.gameObject.SetActive(true);
 
             // If this is the question image, add an Enlarge button to it
-            if ( enlargeButton == true )
+            if (enlargeButton == true)
             {
                 // Add a button to the image, so that we can enlarge it when we click it
                 if (questionObject.GetComponent<Button>() == null) questionObject.gameObject.AddComponent<Button>();
@@ -2473,7 +2519,7 @@ namespace TriviaQuizGame
             // Start the timer again
             timerRunning = true;
         }
-        
+
         /// <summary>
         /// Loads a sound from an online address and assigns it to the relevant question/answer field
         /// </summary>
@@ -2488,8 +2534,8 @@ namespace TriviaQuizGame
             timerRunning = false;
 
             // Deactivate the sound button, since it may have been hidden before
-            if ( targetQuestion != null ) questionObject.Find("ButtonPlaySound").gameObject.SetActive(false);
-            if ( targetAnswer != null ) answerObject.Find("ButtonPlaySound").gameObject.SetActive(false);
+            if (targetQuestion != null) questionObject.Find("ButtonPlaySound").gameObject.SetActive(false);
+            if (targetAnswer != null) answerObject.Find("ButtonPlaySound").gameObject.SetActive(false);
 
             // Get the address of the image
             WWW wwwLoader = new WWW(soundURL);
@@ -2509,7 +2555,7 @@ namespace TriviaQuizGame
                 if (questionLimitCount < questionLimit || questionLimit == 0) PlayQuestionSound();
             }
 
-            if ( answerObject && targetAnswer != null )
+            if (answerObject && targetAnswer != null)
             {
                 // Display it in the question image
                 targetAnswer.sound = wwwLoader.GetAudioClip();

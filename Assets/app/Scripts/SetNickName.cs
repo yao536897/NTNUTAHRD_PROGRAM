@@ -26,12 +26,8 @@ public class SetNickName : MonoBehaviour
     {
         string oldName = GameController.playerName[currentCharacterIndex];
         string newName = inputNickName.text;
-        GameController.playerName.SetValue(newName, currentCharacterIndex);
-        GameController.player.Remove(oldName);
-        GameController.playerCard.Remove(oldName);
-        GameController.playerName[currentCharacterIndex] = newName;
-        GameController.player.Add(newName, avatar.sprite);
-        GameController.playerCard.Add(newName, nickName.sprite);
+        GameController.playerNameMap.Remove(oldName);
+        GameController.playerNameMap.Add(oldName, newName);
         currentCharacterIndex++;
         if (currentCharacterIndex == GameController.playerName.Length)
         {
@@ -47,7 +43,7 @@ public class SetNickName : MonoBehaviour
     void SetCharacter()
     {
         string playerName = GameController.playerName[currentCharacterIndex];
-        inputNickName.text = playerName;
+        inputNickName.text = GameController.playerNameMap[playerName];
         avatar.sprite = GameController.player[playerName];
         nickName.sprite = GameController.playerCard[playerName];
     }

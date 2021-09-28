@@ -59,22 +59,14 @@ public class SelectCharacter : MonoBehaviour
         btn.interactable = false;
         DialogPlugin dialogPlugin = btn.GetComponent<DialogPlugin>();
         dialogPlugin.Dialog();
-
-        string name = "";
-        switch (Language.currentLanguage)
-        {
-            case Language.languageType.Chinese:
-                name = GameController.characterNameCh[((int)dialogPlugin.dialogItems[0].characterName)];
-                break;
-            case Language.languageType.English:
-                name = GameController.characterNameEn[((int)dialogPlugin.dialogItems[0].characterName)];
-                break;
-        }
         Sprite avatar = btn.GetComponent<Image>().sprite;
         Sprite nameCard = btn.transform.GetChild(0).GetComponent<Image>().sprite;
-        GameController.playerName.SetValue(name, selectedIndex);
-        GameController.playerCard.Add(name, nameCard);
-        GameController.player.Add(name, avatar);
+        string oriName = btn.tag;
+        GameController.playerName.SetValue(oriName, selectedIndex);
+        GameController.playerNameMap.Add(oriName, Language.currentLanguage == Language.languageType.Chinese ?
+        GameController.characterNameCh[((int)dialogPlugin.dialogItems[0].characterName)] : oriName);
+        GameController.playerCard.Add(oriName, nameCard);
+        GameController.player.Add(oriName, avatar);
 
         selectedIndex++;
     }
@@ -83,6 +75,7 @@ public class SelectCharacter : MonoBehaviour
     {
         if (selectedIndex == GameController.playerName.Length)
         {
+            GameController.useOriginalName = false;
             onSelectOver.Invoke();
         }
     }

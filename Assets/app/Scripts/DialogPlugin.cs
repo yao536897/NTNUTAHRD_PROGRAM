@@ -31,19 +31,19 @@ public class DialogPlugin : MonoBehaviour
 
     private int currentDialogIndex = 0;
     private bool isListening = false;
+    private Sprite currentShowImage = null;
 
     // Start is called before the first frame update
     void Start()
     {
         targetNode = targetNode ? targetNode : this.gameObject;
         if (GameObject.FindGameObjectWithTag("Dialog")) GameObject.Destroy(GameObject.FindGameObjectWithTag("Dialog"));
-        if (playOnLoad) Dialog();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (isListening && Input.anyKeyDown)
+        if ((isListening && Input.anyKeyDown) || (!isListening && playOnLoad))
         {
             Dialog();
         }
@@ -73,27 +73,34 @@ public class DialogPlugin : MonoBehaviour
         if (!dialogData.avatar)
         {
             avatar.SetActive(false);
-            characterName.SetActive(false);
         }
-        if (showImage.GetComponent<Image>().sprite == null || dialogData.clear)
+        if (currentDialogIndex == 0 || dialogData.clear)
         {
             showImage.SetActive(false);
         }
-        if (dialogData.showImage)
+        if ((dialogData.showImage || currentShowImage) && !dialogData.clear)
         {
-            showImage.SetActive(transform);
-            showImage.GetComponent<Image>().sprite = dialogData.showImage;
-            showImage.GetComponent<RectTransform>().sizeDelta = dialogData.showImage.rect.size;
+            currentShowImage = dialogData.showImage ? dialogData.showImage : currentShowImage;
+            showImage.SetActive(true);
+            showImage.GetComponent<Image>().sprite = currentShowImage;
+            showImage.GetComponent<RectTransform>().sizeDelta = currentShowImage.rect.size;
+        }
+        else
+        {
+            currentShowImage = null;
+            showImage.SetActive(false);
         }
         switch (Language.currentLanguage)
         {
             case Language.languageType.Chinese:
                 txt.GetComponent<Text>().text = dialogData.chTxt;
-                characterName.GetComponent<Text>().text = GameController.characterNameCh[(int)dialogData.characterName];
+                characterName.GetComponent<Text>().text = GameController.useOriginalName || !GameController.playerNameMap.ContainsKey(dialogData.characterName.ToString()) ?
+                GameController.characterNameCh[(int)dialogData.characterName] : GameController.playerNameMap[dialogData.characterName.ToString()];
                 break;
             case Language.languageType.English:
                 txt.GetComponent<Text>().text = dialogData.enTxt;
-                characterName.GetComponent<Text>().text = GameController.characterNameEn[(int)dialogData.characterName];
+                characterName.GetComponent<Text>().text = GameController.useOriginalName || !GameController.playerNameMap.ContainsKey(dialogData.characterName.ToString()) ?
+                GameController.characterNameEn[(int)dialogData.characterName] : GameController.playerNameMap[dialogData.characterName.ToString()];
                 break;
         }
 
@@ -138,6 +145,10 @@ public class DialogPlugin : MonoBehaviour
         logoRt.localScale = new Vector3(1, 1, 1);
 
         currentDialogIndex++;
+    }
+
+    public void turnDialog() {
+        this.playOnLoad = true;
     }
 
 }
