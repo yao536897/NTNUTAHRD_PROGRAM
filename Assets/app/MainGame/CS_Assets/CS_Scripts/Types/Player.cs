@@ -33,5 +33,6 @@ namespace TriviaQuizGame.Types
 
 		[Tooltip("The color of the player name")]
 		public Color color;
+		public string characterName = "";
 	}
 }
