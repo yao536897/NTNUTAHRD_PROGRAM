@@ -13,8 +13,10 @@ namespace epoching.easy_gui
         public Text text_cancel_str;
         public Text text_confirm_str;
         public Text text_confirm_str_must;
-        public GameObject A;
-        public GameObject B;
+        public GameObject John;
+        public GameObject Jackie;
+        public GameObject Teresa;
+        public GameObject Aries;
         public GameObject AUTO;
         public string test;
 
@@ -42,11 +44,17 @@ namespace epoching.easy_gui
         {
             switch(card_num)
             {
-                case "A":
-                    A.SetActive(true);
+                case "John":
+                    John.SetActive(true);
                     break;
-                case "B":
-                    B.SetActive(true);
+                case "Jackie":
+                    Jackie.SetActive(true);
+                    break;
+                case "Teresa":
+                    Teresa.SetActive(true);
+                    break;
+                case "Aries":
+                    Aries.SetActive(true);
                     break;
                 default:
                     AUTO.SetActive(true);
@@ -216,6 +224,7 @@ namespace epoching.easy_gui
 
             //执行传入的事件
             Canvas_confirm_box.hander_cancel();
+            //SceneManager.LoadScene(2);
         }
 
         //listen the confirm button
@@ -229,7 +238,7 @@ namespace epoching.easy_gui
             //执行传入的事件
             Canvas_confirm_box.hander_confirm();
             Screen.orientation = ScreenOrientation.LandscapeLeft;
-            SceneManager.LoadScene(3);
+            //SceneManager.LoadScene("select_char");
         }
     }
     //delegate

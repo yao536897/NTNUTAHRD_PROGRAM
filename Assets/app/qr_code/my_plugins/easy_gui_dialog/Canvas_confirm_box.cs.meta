@@ -1,0 +1,25 @@
+fileFormatVersion: 2
+guid: 623562d6fc181594aba05a1ba94e15c9
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - text_title: {instanceID: 0}
+  - text_content: {instanceID: 0}
+  - text_cancel_str: {instanceID: 0}
+  - text_confirm_str: {instanceID: 0}
+  - text_confirm_str_must: {instanceID: 0}
+  - John: {instanceID: 0}
+  - Jackie: {instanceID: 0}
+  - Teresa: {instanceID: 0}
+  - Aries: {instanceID: 0}
+  - AUTO: {instanceID: 0}
+  - image_panel: {instanceID: 0}
+  - confirm_btn: {instanceID: 0}
+  - cancel_btn: {instanceID: 0}
+  - confirm_btn_must: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

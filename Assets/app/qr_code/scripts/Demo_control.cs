@@ -32,8 +32,10 @@ namespace epoching.easy_qr_code
 
         void Start()
         {
+            
             new WebCamTexture(WebCamTexture.devices[0].name);
             Screen.orientation = ScreenOrientation.Portrait;
+
             //WebCamTexture cam_texture = new WebCamTexture();
             //cam_texture.Play();
         }

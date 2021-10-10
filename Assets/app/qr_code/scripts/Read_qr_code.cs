@@ -37,7 +37,7 @@ namespace epoching.easy_qr_code
 
         private IEnumerator start_webcam()
         {
-            Screen.orientation = ScreenOrientation.LandscapeLeft;
+            Screen.orientation = ScreenOrientation.Portrait;
             yield return new WaitForSeconds(0.11f);
 
             //init camera texture
@@ -109,25 +109,25 @@ namespace epoching.easy_qr_code
                             Canvas_confirm_box.card_num=result.Text;
                             switch (result.Text)
                             {
-                                case "A":
+                                case "John":
                                     Canvas_confirm_box.confirm_box
                                     (
-                                       "讀取卡片A",
+                                       "讀取角色卡_約翰",
                                        result.Text,
                                        "取消",
-                                       "選定角色A",
+                                       "選定角色[約翰]",
                                         delegate ()
                                         {
                                             this.is_reading = true;
                                         },
                                         delegate ()
                                         {
-                                            Debug.Log("選定角色A");
+                                            Debug.Log("選定角色:約翰");
                                             Application.OpenURL(result.Text);
                                             this.is_reading = true;
                                         }
                                    );
-                                    Debug.Log("角色資料A: " + result.Text);
+                                    Debug.Log("角色資料[約翰]: " + result.Text);
 
                                     this.is_reading = false;
 
@@ -135,32 +135,81 @@ namespace epoching.easy_qr_code
 
                                     break;
 
-                                case "B":
+                                case "Jackie":
                                     Canvas_confirm_box.confirm_box
                                     (
-                                       "讀取卡片B",
+                                       "讀取角色卡_杰奇",
                                        result.Text,
                                        "取消",
-                                       "選定角色B",
+                                       "選定角色[杰奇]",
                                         delegate ()
                                         {
                                             this.is_reading = true;
                                         },
                                         delegate ()
                                         {
-                                            Debug.Log("選定角色B");
+                                            Debug.Log("選定角色:杰奇");
                                             Application.OpenURL(result.Text);
                                             this.is_reading = true;
                                         }
                                    );
-                                   Debug.Log("角色資料B: " + result.Text);
+                                   Debug.Log("角色資料[杰奇]: " + result.Text);
 
                                    this.is_reading = false;
 
                                    this.audio_source.Play();
                                    
                                    break;
+                                case "Teresa":
+                                    Canvas_confirm_box.confirm_box
+                                    (
+                                       "讀取角色卡_泰瑞莎",
+                                       result.Text,
+                                       "取消",
+                                       "選定角色[泰瑞莎]",
+                                        delegate ()
+                                        {
+                                            this.is_reading = true;
+                                        },
+                                        delegate ()
+                                        {
+                                            Debug.Log("選定角色:泰瑞莎");
+                                            Application.OpenURL(result.Text);
+                                            this.is_reading = true;
+                                        }
+                                   );
+                                    Debug.Log("角色資料[泰瑞莎]: " + result.Text);
 
+                                    this.is_reading = false;
+
+                                    this.audio_source.Play();
+
+                                    break;
+                                case "Aries":
+                                    Canvas_confirm_box.confirm_box
+                                    (
+                                       "讀取角色卡_艾瑞絲",
+                                       result.Text,
+                                       "取消",
+                                       "選定角色[艾瑞絲]",
+                                        delegate ()
+                                        {
+                                            this.is_reading = true;
+                                        },
+                                        delegate ()
+                                        {
+                                            Debug.Log("選定角色:艾瑞絲");
+                                            Application.OpenURL(result.Text);
+                                            this.is_reading = true;
+                                        }
+                                   );
+                                    Debug.Log("角色資料[艾瑞絲]: " + result.Text);
+
+                                    this.is_reading = false;
+
+                                    this.audio_source.Play();
+
+                                    break;
                                 default:
                                     Canvas_confirm_box.confirm_box
                                     (

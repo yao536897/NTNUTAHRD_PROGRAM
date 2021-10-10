@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using GlobalSetting;
 
 public class SelectCharacter : MonoBehaviour
@@ -51,7 +52,7 @@ public class SelectCharacter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        
     }
 
     public void onSelectCharacter(Button btn)
@@ -69,6 +70,8 @@ public class SelectCharacter : MonoBehaviour
         GameController.player.Add(oriName, avatar);
 
         selectedIndex++;
+        //SceneManager.LoadScene("qrcode_scanner");
+
     }
 
     public void SelectCharacterOver()
@@ -78,5 +81,7 @@ public class SelectCharacter : MonoBehaviour
             GameController.useOriginalName = false;
             onSelectOver.Invoke();
         }
+        
+
     }
 }
