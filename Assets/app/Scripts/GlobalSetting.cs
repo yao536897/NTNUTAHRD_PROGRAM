@@ -22,6 +22,10 @@ namespace GlobalSetting
         public static string[] characterNameCh = new string[] { "", "約翰", "杰奇", "愛瑞絲", "泰瑞莎", "校長", "四人" };
         public static string[] characterNameEn = new string[] { "", "John", "Jacky", "Aries", "Teresa", "Master", "All" };
         public static bool useOriginalName = true;
+
+        public static int selectedIndex = 0;
+        public static Game_Status gameStatus = Game_Status.None;
+        public static string currentCharacter = "";
     }
     public enum Character
     {
@@ -32,5 +36,10 @@ namespace GlobalSetting
         Teresa,
         Master,
         All
+    }
+
+    public enum Game_Status {
+        None,
+        SelectCharacter
     }
 }

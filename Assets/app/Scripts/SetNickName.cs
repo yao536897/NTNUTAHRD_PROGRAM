@@ -13,6 +13,7 @@ public class SetNickName : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        currentCharacterIndex = GameController.player.Count - 1;
         SetCharacter();
     }
 
@@ -36,7 +37,7 @@ public class SetNickName : MonoBehaviour
         }
         else
         {
-            SetCharacter();
+            new SceneController().ChangeToScene("select_char");
         }
     }
 
