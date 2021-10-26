@@ -59,7 +59,7 @@ namespace epoching.easy_gui
                 case "Invalid":
                     break;
                 default:
-                    AUTO.SetActive(true);
+                    // AUTO.SetActive(true);
                     break;
             }
         }

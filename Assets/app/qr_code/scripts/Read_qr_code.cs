@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using ZXing;
-using ZXing.QrCode;
-using epoching.easy_debug_on_the_phone;
 using UnityEngine.UI;
 using epoching.easy_gui;
 using GlobalSetting;
+
 
 namespace epoching.easy_qr_code
 {
     public class Read_qr_code : MonoBehaviour
     {
+        static readonly string[] questionCard = { "Color2", "Color3", "Color4", "Color5" };
+        static readonly string[] functionCard = { "Inherit", "Grab", "Auto", "Assign", "Cake", "Booster" };
+        static readonly string eventCard = "Color6";
+
         [Header("raw_image_video")]
         public RawImage raw_image_video;
 
@@ -27,6 +31,7 @@ namespace epoching.easy_qr_code
         //is reading qr_code
         private bool is_reading = false;
 
+        public UnityEvent eventCall;
 
         // Start is called before the first frame update
 
@@ -107,157 +112,227 @@ namespace epoching.easy_qr_code
                         if (result != null)
                         {
                             Canvas_confirm_box.card_num = result.Text;
-                            if (isValidCharacter(result.Text))
+
+                            switch (GameController.gameStatus)
                             {
-                                switch (result.Text)
-                                {
-                                    case "John":
-                                        Canvas_confirm_box.confirm_box
-                                        (
-                                           "讀取角色卡_約翰",
-                                           result.Text,
-                                           "取消",
-                                           "選定角色[約翰]",
-                                            delegate ()
-                                            {
-                                                this.is_reading = true;
-                                            },
-                                            delegate ()
-                                            {
-                                                Debug.Log("選定角色:約翰");
-                                                new SceneController().ChangeToScene("SetNickName");
-                                                this.is_reading = true;
-                                            }
-                                       );
-                                        Debug.Log("角色資料[約翰]: " + result.Text);
-
-                                        this.is_reading = false;
-
-                                        this.audio_source.Play();
-
-                                        break;
-
-                                    case "Jackie":
-                                        Canvas_confirm_box.confirm_box
-                                        (
-                                           "讀取角色卡_杰奇",
-                                           result.Text,
-                                           "取消",
-                                           "選定角色[杰奇]",
-                                            delegate ()
-                                            {
-                                                this.is_reading = true;
-                                            },
-                                            delegate ()
-                                            {
-                                                Debug.Log("選定角色:杰奇");
-                                                new SceneController().ChangeToScene("SetNickName");
-                                                this.is_reading = true;
-                                            }
-                                       );
-                                        Debug.Log("角色資料[杰奇]: " + result.Text);
-
-                                        this.is_reading = false;
-
-                                        this.audio_source.Play();
-
-                                        break;
-                                    case "Teresa":
-                                        Canvas_confirm_box.confirm_box
-                                        (
-                                           "讀取角色卡_泰瑞莎",
-                                           result.Text,
-                                           "取消",
-                                           "選定角色[泰瑞莎]",
-                                            delegate ()
-                                            {
-                                                this.is_reading = true;
-                                            },
-                                            delegate ()
-                                            {
-                                                Debug.Log("選定角色:泰瑞莎");
-                                                new SceneController().ChangeToScene("SetNickName");
-                                                this.is_reading = true;
-                                            }
-                                       );
-                                        Debug.Log("角色資料[泰瑞莎]: " + result.Text);
-
-                                        this.is_reading = false;
-
-                                        this.audio_source.Play();
-
-                                        break;
-                                    case "Aries":
-                                        Canvas_confirm_box.confirm_box
-                                        (
-                                           "讀取角色卡_艾瑞絲",
-                                           result.Text,
-                                           "取消",
-                                           "選定角色[艾瑞絲]",
-                                            delegate ()
-                                            {
-                                                this.is_reading = true;
-                                            },
-                                            delegate ()
-                                            {
-                                                Debug.Log("選定角色:艾瑞絲");
-                                                new SceneController().ChangeToScene("SetNickName");
-                                                this.is_reading = true;
-                                            }
-                                       );
-                                        Debug.Log("角色資料[艾瑞絲]: " + result.Text);
-
-                                        this.is_reading = false;
-
-                                        this.audio_source.Play();
-
-                                        break;
-                                    default:
-                                        Canvas_confirm_box.confirm_box
-                                        (
-                                           "讀取道具卡【自動作答】",
-                                           result.Text,
-                                           "取消",
-                                           "使用道具卡",
-                                            delegate ()
-                                            {
-                                                this.is_reading = true;
-                                            },
-                                            delegate ()
-                                            {
-                                                Debug.Log("讀取道具卡【自動作答】");
-                                                new SceneController().ChangeToScene("SetNickName");
-                                                this.is_reading = true;
-                                            }
-                                       );
-                                        Debug.Log("讀取道具卡【自動作答】 " + result.Text);
-
-                                        this.is_reading = false;
-
-                                        this.audio_source.Play();
-
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                Canvas_confirm_box.confirm_box
-                                (
-                                   "錯誤角色卡",
-                                   "Invalid",
-                                   "",
-                                   "返回",
-                                    delegate () {},
-                                    delegate ()
+                                case Game_Status.SelectCharacter:
+                                    if (GameController.currentCharacter == result.Text)
                                     {
-                                        new SceneController().ChangeToScene("qrcode_scanner");
-                                        this.is_reading = true;
-                                    }
-                               );
-                                this.is_reading = false;
+                                        switch (result.Text)
+                                        {
+                                            case "John":
+                                                Canvas_confirm_box.confirm_box
+                                                (
+                                                   "讀取角色卡_約翰",
+                                                   result.Text,
+                                                   "取消",
+                                                   "選定角色[約翰]",
+                                                    delegate ()
+                                                    {
+                                                        this.is_reading = true;
+                                                    },
+                                                    delegate ()
+                                                    {
+                                                        Debug.Log("選定角色:約翰");
+                                                        SceneManager.LoadScene("SetNickName");
+                                                        this.is_reading = true;
+                                                    }
+                                               );
+                                                Debug.Log("角色資料[約翰]: " + result.Text);
 
-                                this.audio_source.Play();
+                                                this.is_reading = false;
+
+                                                this.audio_source.Play();
+
+                                                break;
+
+                                            case "Jackie":
+                                                Canvas_confirm_box.confirm_box
+                                                (
+                                                   "讀取角色卡_杰奇",
+                                                   result.Text,
+                                                   "取消",
+                                                   "選定角色[杰奇]",
+                                                    delegate ()
+                                                    {
+                                                        this.is_reading = true;
+                                                    },
+                                                    delegate ()
+                                                    {
+                                                        Debug.Log("選定角色:杰奇");
+                                                        SceneManager.LoadScene("SetNickName");
+                                                        this.is_reading = true;
+                                                    }
+                                               );
+                                                Debug.Log("角色資料[杰奇]: " + result.Text);
+
+                                                this.is_reading = false;
+
+                                                this.audio_source.Play();
+
+                                                break;
+                                            case "Teresa":
+                                                Canvas_confirm_box.confirm_box
+                                                (
+                                                   "讀取角色卡_泰瑞莎",
+                                                   result.Text,
+                                                   "取消",
+                                                   "選定角色[泰瑞莎]",
+                                                    delegate ()
+                                                    {
+                                                        this.is_reading = true;
+                                                    },
+                                                    delegate ()
+                                                    {
+                                                        Debug.Log("選定角色:泰瑞莎");
+                                                        SceneManager.LoadScene("SetNickName");
+                                                        this.is_reading = true;
+                                                    }
+                                               );
+                                                Debug.Log("角色資料[泰瑞莎]: " + result.Text);
+
+                                                this.is_reading = false;
+
+                                                this.audio_source.Play();
+
+                                                break;
+                                            case "Aries":
+                                                Canvas_confirm_box.confirm_box
+                                                (
+                                                   "讀取角色卡_艾瑞絲",
+                                                   result.Text,
+                                                   "取消",
+                                                   "選定角色[艾瑞絲]",
+                                                    delegate ()
+                                                    {
+                                                        this.is_reading = true;
+                                                    },
+                                                    delegate ()
+                                                    {
+                                                        Debug.Log("選定角色:艾瑞絲");
+                                                        SceneManager.LoadScene("SetNickName");
+                                                        this.is_reading = true;
+                                                    }
+                                               );
+                                                Debug.Log("角色資料[艾瑞絲]: " + result.Text);
+
+                                                this.is_reading = false;
+
+                                                this.audio_source.Play();
+
+                                                break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Canvas_confirm_box.confirm_box
+                                        (
+                                           "錯誤角色卡",
+                                           "Invalid",
+                                           "",
+                                           "返回",
+                                            delegate () { },
+                                            delegate ()
+                                            {
+                                                SceneManager.LoadScene("qrcode_scanner");
+                                                this.is_reading = true;
+                                            }
+                                       );
+                                        this.is_reading = false;
+
+                                        this.audio_source.Play();
+                                    }
+                                    break;
+                                case Game_Status.Gaming:
+                                    switch (cardType(result.Text))
+                                    {
+                                        case "Question":
+                                            Canvas_confirm_box.confirm_box
+                                            (
+                                               result.Text,
+                                               "Invalid",
+                                               "",
+                                               "返回",
+                                                delegate () { },
+                                                delegate ()
+                                                {
+                                                    int questionType = Array.IndexOf(questionCard, result.Text);
+                                                    CustomQuestion[] targetQuestions = Array.FindAll(GameController.questions, e => e.type == questionType);
+                                                    int targetIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0, targetQuestions.Length));
+                                                    GameController.currentQuestion = targetQuestions[targetIndex];
+
+                                                    this.is_reading = true;
+                                                    SceneManager.LoadScene("CS_GameHotseat");
+                                                }
+                                           );
+                                            break;
+                                        case "Function":
+                                            Canvas_confirm_box.confirm_box
+                                            (
+                                               "讀取道具卡【自動作答】",
+                                               result.Text,
+                                               "取消",
+                                               "使用道具卡",
+                                                delegate ()
+                                                {
+                                                    this.is_reading = true;
+                                                },
+                                                delegate ()
+                                                {
+                                                    Debug.Log("讀取道具卡【自動作答】");
+                                                    SceneManager.LoadScene("SetNickName");
+                                                    this.is_reading = true;
+                                                }
+                                           );
+                                            Debug.Log("讀取道具卡【自動作答】 " + result.Text);
+
+                                            this.is_reading = false;
+
+                                            this.audio_source.Play();
+                                            break;
+                                        case "Event":
+                                            eventCall.Invoke();
+                                            break;
+                                        case "Unknown":
+                                            Canvas_confirm_box.confirm_box
+                                            (
+                                               "未知卡片",
+                                               "Invalid",
+                                               "",
+                                               "返回",
+                                                delegate () { },
+                                                delegate ()
+                                                {
+                                                    SceneManager.LoadScene("qrcode_scanner");
+                                                    this.is_reading = true;
+                                                }
+                                           );
+                                            this.is_reading = false;
+
+                                            this.audio_source.Play();
+                                            break;
+                                    }
+                                    break;
+                                default:
+                                    Canvas_confirm_box.confirm_box
+                                    (
+                                       "未知的遊戲階段",
+                                       "Invalid",
+                                       "",
+                                       "返回",
+                                        delegate () { },
+                                        delegate ()
+                                        {
+                                            SceneManager.LoadScene("qrcode_scanner");
+                                            this.is_reading = true;
+                                        }
+                                   );
+                                    this.is_reading = false;
+
+                                    this.audio_source.Play();
+                                    break;
                             }
+
                         }
                     }
                     catch (Exception ex)
@@ -280,10 +355,13 @@ namespace epoching.easy_qr_code
             }
         }
 
-        private bool isValidCharacter(string name)
+        string cardType(string text)
         {
-            return GameController.gameStatus == Game_Status.SelectCharacter && GameController.currentCharacter == name;
+            if (Array.Exists(questionCard, e => e == text)) return "Question";
+            if (Array.Exists(functionCard, e => e == text)) return "Function";
+            if (text == eventCard) return "Event";
+            return "Unknown";
         }
+
     }
 }
-

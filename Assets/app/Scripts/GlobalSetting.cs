@@ -26,7 +26,30 @@ namespace GlobalSetting
         public static int selectedIndex = 0;
         public static Game_Status gameStatus = Game_Status.None;
         public static string currentCharacter = "";
+        public static int currentPlayer = 0;
+        public static CustomQuestion[] questions = new CustomQuestion[0];
+        public static CustomQuestion currentQuestion = new CustomQuestion();
+        public static int maxRound = 1;
+        public static int nowRound = 1;
     }
+
+    [System.Serializable]
+    public class QuestionContainer
+    {
+        public CustomQuestion[] data;
+    }
+
+    [System.Serializable]
+    public class CustomQuestion
+    {
+        public string question;
+        public string program;
+        public string[] options;
+        public int answer;
+        public int type;
+
+    }
+
     public enum Character
     {
         None,
@@ -38,8 +61,10 @@ namespace GlobalSetting
         All
     }
 
-    public enum Game_Status {
+    public enum Game_Status
+    {
         None,
-        SelectCharacter
+        SelectCharacter,
+        Gaming
     }
 }

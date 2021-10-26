@@ -2,13 +2,20 @@
 using UnityEngine.UI;
 using GlobalSetting;
 
+
 public class Login : MonoBehaviour
 {
+    public TextAsset questionJson = null;
+
     private DialogPlugin dialogPlugin;
+
     // Start is called before the first frame update
     void Start()
     {
         dialogPlugin = GameObject.FindGameObjectWithTag("GameController").GetComponent<DialogPlugin>();
+        QuestionContainer questionContainer = JsonUtility.FromJson<QuestionContainer>(questionJson.text);
+        GameController.questions = questionContainer.data;
+        PlayerPrefs.DeleteAll();
     }
 
     // Update is called once per frame
@@ -36,4 +43,5 @@ public class Login : MonoBehaviour
     {
         dialogPlugin.Dialog();
     }
+
 }

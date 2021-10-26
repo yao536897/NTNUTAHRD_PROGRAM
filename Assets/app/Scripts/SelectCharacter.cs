@@ -74,7 +74,7 @@ public class SelectCharacter : MonoBehaviour
         GameController.player.Add(oriName, avatar);
 
         GameController.selectedIndex++;
-        SceneManager.LoadScene("qrcode_scanner");
+        // SceneManager.LoadScene("qrcode_scanner");
     }
 
     public void SelectCharacterOver()
@@ -84,8 +84,6 @@ public class SelectCharacter : MonoBehaviour
             GameController.useOriginalName = false;
             onSelectOver.Invoke();
         }
-
-
     }
 
     private void setCurrentCharacter(string name)
