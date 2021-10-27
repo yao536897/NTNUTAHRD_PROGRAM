@@ -169,7 +169,7 @@ namespace epoching.easy_qr_code
                                         case "Function":
 
                                             string cardName = getCardName(result.Text);
-                                            setQuestion(result.Text);
+                                            setQuestion();
 
                                             Canvas_confirm_box.confirm_box
                                             (
@@ -326,6 +326,14 @@ namespace epoching.easy_qr_code
             {
                 GameController.currentQuestion = GameController.questions[0];
             }
+
+            this.is_reading = true;
+        }
+
+        void setQuestion()
+        {
+            int targetIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0, GameController.questions.Length));
+            GameController.currentQuestion = GameController.questions[targetIndex];
 
             this.is_reading = true;
         }
