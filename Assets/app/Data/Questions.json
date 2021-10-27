@@ -1,0 +1,21 @@
+{
+    "data": [{
+        "question": "請問透過此煉金陣得到的結果是?",
+        "program": "#include<iostream>\nusing namespace std;\n\nint main()\n{   cout << 1+1 << endl\n    return 0;\n}",
+        "options": ["2", "1+1", "1", "0"],
+        "answer": 0,
+        "type": 0
+    }, {
+        "question": "請問透過此煉金陣得到的結果是?",
+        "program": "#include<iostream>\nusing namespace std;\n\nint main()\n{   cout << “你還好嗎？” << endl\n    return 0;\n}",
+        "options": ["是，我很好", "不，我不好", "你還好嗎？", "還好"],
+        "answer": 2,
+        "type": 1
+    }, {
+        "question": "請問透過此煉金陣得到的結果是?",
+        "program": "#include<iostream>\nusing namespace std;\nint main()\n{   cout << 29%5 << endl\n    return 0;\n}",
+        "options": ["5.8", "4", "29%5", "5"],
+        "answer": 1,
+        "type": 1
+    }]
+}

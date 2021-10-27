@@ -1,12 +1,24 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using epoching.easy_gui;
+using GlobalSetting;
 
 namespace epoching.easy_qr_code
 {
     public class Demo_control : MonoBehaviour
     {
+        static readonly string[] questionCard = { "Color1", "Color2", "Color3", "Color4" };
+        static readonly string[] functionCard = { "Inherit", "Grab", "Auto", "Assign", "Cake", "Booster" };
+        public TextAsset questionJson = null;
+
+
+
+
+
+
         [Header("audio source")]
         public AudioSource audio_source;
 
@@ -23,6 +35,10 @@ namespace epoching.easy_qr_code
         public GameObject game_obj_generate_qr_code;
         //public GameObject ImageA;
 
+        public GameObject hint;
+
+        public DialogPlugin[] dialogPlugins = new DialogPlugin[0];
+
         void Awake()
         {
             Demo_control.instance = this;
@@ -32,12 +48,16 @@ namespace epoching.easy_qr_code
 
         void Start()
         {
-            
+
             new WebCamTexture(WebCamTexture.devices[0].name);
             Screen.orientation = ScreenOrientation.Portrait;
 
+            // QuestionContainer questionContainer = JsonUtility.FromJson<QuestionContainer>(questionJson.text);
+            // GameController.questions = questionContainer.data;
+
             //WebCamTexture cam_texture = new WebCamTexture();
             //cam_texture.Play();
+            if (CardBuffer.sleeping == -2) hint.SetActive(true);
         }
 
         public void change_to_main()
@@ -72,13 +92,54 @@ namespace epoching.easy_qr_code
 
             this.demo_statu = Demo_statu.generate_qr_code;
         }
-
+        string cardType(string text)
+        {
+            if (Array.Exists(questionCard, e => e == text)) return "Question";
+            if (Array.Exists(functionCard, e => e == text)) return "Function";
+            return "Unknown";
+        }
         //event
         #region
         public void on_read_qr_code_btn()
         {
+            // switch (GameController.gameStatus)
+            // {
+            //     case Game_Status.SelectCharacter:
+            //         SceneManager.LoadScene("SetNickName");
+            //         break;
+            //     case Game_Status.Gaming:
+            //         // this.change_to_read_qr_code();
+            //         int questionType = Array.IndexOf(questionCard, "Color2");
+            //         CustomQuestion[] targetQuestions = Array.FindAll(GameController.questions, e => e.type == questionType);
+            //         int targetIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0, targetQuestions.Length));
+            //         GameController.currentQuestion = targetQuestions[targetIndex];
+            //         // SceneManager.LoadScene("CS_GameHotseat");
+
+            //         // randomEvent();
+
+            //         // CardBuffer.extraQuestion = true;
+            //         // SceneManager.LoadScene("CS_GameHotseat");
+
+            //         // CardBuffer.forceGameOver = true;
+            //         // SceneManager.LoadScene("CS_GameHotseat");
+
+            //         CardBuffer.sleeping = 2;
+            //         SceneManager.LoadScene("CS_GameHotseat");
+            //         break;
+            // }
             this.change_to_read_qr_code();
             this.audio_source.Play();
+        }
+
+        public void randomEvent()
+        {
+            StartCoroutine(Canvas_grounp_fade.hide(this.game_obj_main));
+            StartCoroutine(Canvas_grounp_fade.hide(this.game_obj_read_qr_code));
+            StartCoroutine(Canvas_grounp_fade.hide(this.game_obj_generate_qr_code));
+
+
+            int dialogIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0, dialogPlugins.Length));
+            dialogPlugins[dialogIndex].Dialog();
         }
 
         public void on_generate_qr_code_btn()
@@ -101,4 +162,5 @@ namespace epoching.easy_qr_code
         read_qr_code,
         generate_qr_code
     }
+
 }

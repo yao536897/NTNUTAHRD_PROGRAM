@@ -25,11 +25,14 @@ public class SelectCharacter : MonoBehaviour
     public Image teresaNode;
     public UnityEvent onSelectOver;
 
-    private int selectedIndex = 0;
-
     // Start is called before the first frame update
     void Start()
     {
+        GameController.gameStatus = Game_Status.SelectCharacter;
+        foreach (string key in GameController.player.Keys)
+        {
+            GameObject.FindGameObjectWithTag(key).GetComponent<Button>().interactable = false;
+        }
         switch (Language.currentLanguage)
         {
             case Language.languageType.Chinese:
@@ -52,7 +55,7 @@ public class SelectCharacter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void onSelectCharacter(Button btn)
@@ -63,25 +66,42 @@ public class SelectCharacter : MonoBehaviour
         Sprite avatar = btn.GetComponent<Image>().sprite;
         Sprite nameCard = btn.transform.GetChild(0).GetComponent<Image>().sprite;
         string oriName = btn.tag;
-        GameController.playerName.SetValue(oriName, selectedIndex);
+        setCurrentCharacter(oriName);
+        GameController.playerName.SetValue(oriName, GameController.selectedIndex);
         GameController.playerNameMap.Add(oriName, Language.currentLanguage == Language.languageType.Chinese ?
         GameController.characterNameCh[((int)dialogPlugin.dialogItems[0].characterName)] : oriName);
         GameController.playerCard.Add(oriName, nameCard);
         GameController.player.Add(oriName, avatar);
 
-        selectedIndex++;
-        //SceneManager.LoadScene("qrcode_scanner");
-
+        GameController.selectedIndex++;
+        // SceneManager.LoadScene("qrcode_scanner");
     }
 
     public void SelectCharacterOver()
     {
-        if (selectedIndex == GameController.playerName.Length)
+        if (GameController.selectedIndex == GameController.playerName.Length)
         {
             GameController.useOriginalName = false;
             onSelectOver.Invoke();
         }
-        
+    }
 
+    private void setCurrentCharacter(string name)
+    {
+        switch (name)
+        {
+            case "John":
+                GameController.currentCharacter = "John";
+                break;
+            case "Jacky":
+                GameController.currentCharacter = "Jackie";
+                break;
+            case "Teresa":
+                GameController.currentCharacter = "Teresa";
+                break;
+            case "Aries":
+                GameController.currentCharacter = "Aries";
+                break;
+        }
     }
 }

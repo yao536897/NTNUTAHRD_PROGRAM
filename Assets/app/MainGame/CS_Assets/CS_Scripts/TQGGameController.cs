@@ -9,11 +9,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System;
-using System.Text;
 using System.Xml;
-using System.IO;
 using TriviaQuizGame.Types;
-using System.Collections.Generic;
 using GlobalSetting;
 
 namespace TriviaQuizGame
@@ -45,7 +42,7 @@ namespace TriviaQuizGame
         public Player[] players;
 
         //The current turn of the player. 0 means it's player 1's turn to play, 1 means it's player 2's turn, etc
-        internal int currentPlayer = 0;
+        internal int currentPlayer = GameController.currentPlayer;
 
         // Is this game played in hot-seat mode? This mode lets each player answer a question in turn.
         internal bool playInTurns = true;
@@ -279,6 +276,15 @@ namespace TriviaQuizGame
             if (victoryCanvas) victoryCanvas.gameObject.SetActive(false);
             if (largerImageCanvas) largerImageCanvas.gameObject.SetActive(false);
 
+            if (CardBuffer.forceGameOver) StartCoroutine(Victory(0));
+            if (CardBuffer.sleeping == currentPlayer)
+            {
+                if (GameController.currentPlayer < numberOfPlayers - 1) GameController.currentPlayer++;
+                else GameController.currentPlayer = 0;
+                CardBuffer.sleeping = -1;
+                SceneManager.LoadScene("CS_GameHotseat");
+            }
+
             //Get the highscore for the player
 #if UNITY_5_3 || UNITY_5_3_OR_NEWER
             highScore = PlayerPrefs.GetFloat(SceneManager.GetActiveScene().name + "HighScore", 0);
@@ -411,6 +417,8 @@ namespace TriviaQuizGame
                 players[p].characterName = oriName;
                 players[p].name = GameController.playerNameMap[oriName];
                 players[p].nameText.GetComponent<Text>().text = GameController.playerNameMap[oriName];
+                players[p].scoreCount = PlayerPrefs.GetInt("ps" + p.ToString());
+                players[p].scoreText.GetComponent<Text>().text = PlayerPrefs.GetInt("ps" + p.ToString()).ToString();
                 Image avatar = players[p].nameText.parent.transform.GetChild(0).GetComponent<Image>();
                 switch (oriName)
                 {
@@ -798,7 +806,7 @@ namespace TriviaQuizGame
                     if (currentQuestion < questions.Length)
                     {
                         // Display the current question
-                        questionObject.Find("Text").GetComponent<Text>().text = questions[currentQuestion].question;
+                        questionObject.Find("Text").GetComponent<Text>().text = GameController.currentQuestion.question + "\n" + GameController.currentQuestion.program;
 
                         // if the question is multi choice, show check button
                         if (multiChoiceButton) multiChoiceButton.SetActive(questions[currentQuestion].multiChoice);
@@ -817,7 +825,7 @@ namespace TriviaQuizGame
                         {
                             if (questions[currentQuestion].sound != null && questions[currentQuestion].soundURL != String.Empty)
                             {
-                                StartCoroutine(LoadSoundFromURL(questions[currentQuestion].soundURL, questions[currentQuestion], null, null));
+                                // StartCoroutine(LoadSoundFromURL(questions[currentQuestion].soundURL, questions[currentQuestion], null, null));
                             }
                             else if (questions[currentQuestion].sound != null)
                             {
@@ -845,7 +853,7 @@ namespace TriviaQuizGame
                                 // If we have an image URL, try to load it
                                 if (questions[currentQuestion].imageURL != null && questions[currentQuestion].imageURL != String.Empty)
                                 {
-                                    StartCoroutine(LoadImageFromURL(questions[currentQuestion].imageURL, imageObject.GetComponent<Image>(), true));
+                                    // StartCoroutine(LoadImageFromURL(questions[currentQuestion].imageURL, imageObject.GetComponent<Image>(), true));
                                 }
                                 else if (questions[currentQuestion].image) // Otherwise, take the image that is assigned locally ( from inside Unity )
                                 {
@@ -930,7 +938,7 @@ namespace TriviaQuizGame
                             answerObjects[index].GetComponent<Button>().Select();
 
                             // Display the text of the answer
-                            if (index < questions[currentQuestion].answers.Length) answerObjects[index].Find("Text").GetComponent<Text>().text = questions[currentQuestion].answers[index].answer;
+                            if (index < GameController.currentQuestion.options.Length) answerObjects[index].Find("Text").GetComponent<Text>().text = GameController.currentQuestion.options[index];
                             else answerObjects[index].gameObject.SetActive(false);
 
                             // If the answer has a sound, activate the sound button so we can play it
@@ -938,7 +946,7 @@ namespace TriviaQuizGame
                             {
                                 if (questions[currentQuestion].answers[index].sound != null && questions[currentQuestion].answers[index].soundURL != String.Empty)
                                 {
-                                    StartCoroutine(LoadSoundFromURL(questions[currentQuestion].answers[index].soundURL, null, answerObjects[index], questions[currentQuestion].answers[index]));
+                                    // StartCoroutine(LoadSoundFromURL(questions[currentQuestion].answers[index].soundURL, null, answerObjects[index], questions[currentQuestion].answers[index]));
                                 }
                                 else if (questions[currentQuestion].answers[index].sound != null)
                                 {
@@ -958,7 +966,7 @@ namespace TriviaQuizGame
                                 // If we have an image URL, try to load it
                                 if (questions[currentQuestion].answers[index].imageURL != null && questions[currentQuestion].answers[index].imageURL != String.Empty)
                                 {
-                                    StartCoroutine(LoadImageFromURL(questions[currentQuestion].answers[index].imageURL, answerObjects[index].Find("Image").GetComponent<Image>(), false));
+                                    // StartCoroutine(LoadImageFromURL(questions[currentQuestion].answers[index].imageURL, answerObjects[index].Find("Image").GetComponent<Image>(), false));
                                 }
                                 else if (questions[currentQuestion].answers[index].image) // Otherwise, take the image that is assigned locally ( from inside Unity )
                                 {
@@ -1041,17 +1049,9 @@ namespace TriviaQuizGame
             // We can only choose an answer if a question is being asked now
             if (askingQuestion == true)
             {
-                // If this is a multi-choice question, allow the player to choose more than one question before checking the result
-                if (questions[currentQuestion].multiChoice == true)
-                {
-                    if (answerObjects[answerIndex].Find("Outline")) answerObjects[answerIndex].Find("Outline").GetComponent<Image>().enabled = !answerObjects[answerIndex].Find("Outline").GetComponent<Image>().enabled;
-
-                    return;
-                }
-
                 // If the chosen answer is wrong, disable it and reduce the bonus for this question
                 //if ( answerObjects[answerIndex].Find("Text").GetComponent<Text>().text != questions[currentQuestion].correctAnswer )
-                if (questions[currentQuestion].answers[answerIndex].isCorrect == false)
+                if (GameController.currentQuestion.answer != answerIndex)
                 {
                     // Play the animation Wrong
                     if (animationWrong)
@@ -1122,8 +1122,9 @@ namespace TriviaQuizGame
                         // If we have more than one player and we are playing in turns (hotseat), go to the next player turn
                         if (playInTurns == true)
                         {
-                            if (currentPlayer < numberOfPlayers - 1) currentPlayer++;
-                            else currentPlayer = 0;
+                            if (GameController.currentPlayer < numberOfPlayers - 1) GameController.currentPlayer++;
+                            else GameController.currentPlayer = 0;
+
                         }
                     }
 
@@ -1167,6 +1168,8 @@ namespace TriviaQuizGame
 
                     // Add the bonus to the score of the current player
                     players[currentPlayer].scoreCount += bonus;
+
+                    PlayerPrefs.SetInt("ps" + currentPlayer, Mathf.FloorToInt(players[currentPlayer].scoreCount));
 
                     // Add the time bonus to the time left, if we have a global timer
                     if (globalTime > 0)
@@ -1367,9 +1370,9 @@ namespace TriviaQuizGame
             for (index = 0; index < answerObjects.Length; index++)
             {
                 // If this is the correct answer, highlight it and delay its animation
-                if (index < questions[currentQuestion].answers.Length)
+                if (index < GameController.currentQuestion.options.Length)
                 {
-                    if (questions[currentQuestion].answers[index].isCorrect == true)
+                    if (index == GameController.currentQuestion.answer)
                     {
                         // Highlight the correct answer
                         if (showCorrectAnswer == true) eventSystem.SetSelectedGameObject(answerObjects[index].gameObject);
@@ -1383,81 +1386,15 @@ namespace TriviaQuizGame
                 }
             }
 
-            // If we have a followup to the question, display it
-            if ((questions[currentQuestion].followup != null && questions[currentQuestion].followup != String.Empty) || questions[currentQuestion].followupImage || (questions[currentQuestion].followupImageURL != null && questions[currentQuestion].followupImageURL != String.Empty) || questions[currentQuestion].followupSound || (questions[currentQuestion].followupSound != null && questions[currentQuestion].followupSoundURL != String.Empty))
+            if (GameController.currentPlayer == GameController.playerName.Length - 1)
             {
-                if (questions[currentQuestion].followup != String.Empty)
+                if (!CardBuffer.extraQuestion)
                 {
-                    // Display the followup to the question
-                    questionObject.Find("Text").GetComponent<Text>().text = questions[currentQuestion].followup;
+                    GameController.nowRound++;
                 }
-
-                // If there is a followup image, display it
-                if (questions[currentQuestion].followupImage || questions[currentQuestion].followupImageURL != String.Empty)
-                {
-                    if (questions[currentQuestion].imageURL != null && questions[currentQuestion].followupImageURL != String.Empty)
-                    {
-                        StartCoroutine(LoadImageFromURL(questions[currentQuestion].followupImageURL, imageObject.GetComponent<Image>(), false));
-                    }
-                    else if (questions[currentQuestion].followupImage)
-                    {
-                        // Show the sprite object immediately
-                        imageObject.gameObject.SetActive(true);
-
-                        imageObject.GetComponent<Image>().sprite = questions[currentQuestion].followupImage;
-                    }
-                }
-                else if (questions[currentQuestion].image == null && questions[currentQuestion].followupImageURL == String.Empty)
-                {
-                    imageObject.gameObject.SetActive(false);
-                }
-
-                // If the question has a followup sound, activate the sound button so we can play it
-                if (questionObject.Find("ButtonPlaySound"))
-                {
-                    // If the question has a sound, activate the sound button so we can play it
-                    if (questionObject.Find("ButtonPlaySound"))
-                    {
-                        if (questions[currentQuestion].followupSound != null && questions[currentQuestion].followupSoundURL != String.Empty)
-                        {
-                            StartCoroutine(LoadSoundFromURL(questions[currentQuestion].followupSoundURL, questions[currentQuestion], null, null));
-                        }
-                        else if (questions[currentQuestion].followupSound != null)
-                        {
-                            // Activate the sound button, since it may have been hidden before
-                            questionObject.Find("ButtonPlaySound").gameObject.SetActive(true);
-
-                            // Play the sound when the question is displayed
-                            PlayQuestionSound();
-                        }
-                        else
-                        {
-                            // Hide the sound button, since we don't need it in this answer
-                            questionObject.Find("ButtonPlaySound").gameObject.SetActive(false);
-                        }
-                    }
-                }
-
-                // Add a button component to the text object that displays the followup info
-                if (questionObject.GetComponent<Button>() == null) questionObject.gameObject.AddComponent<Button>();
-
-                // If there is a button, activate it
-                if (questionObject.GetComponent<Button>()) questionObject.GetComponent<Button>().enabled = true;
-
-                // Remove any other function listening for a click on this button ( ex: Stop listening for "ShowLargerImage()" )
-                questionObject.GetComponent<Button>().onClick.RemoveAllListeners();
-
-                // Listen for a click on the button to move to the next question
-                questionObject.GetComponent<Button>().onClick.AddListener(delegate () { SkipQuestion(); });
-
-                // Set the button as selected
-                eventSystem.SetSelectedGameObject(questionObject.gameObject);
             }
-            else
-            {
-                // Reset the question and answers in order to display the next question
-                StartCoroutine(ResetQuestion(0.5f));
-            }
+
+            StartCoroutine(ResetQuestion(0.5f));
         }
 
         /// <summary>
@@ -1471,7 +1408,7 @@ namespace TriviaQuizGame
             for (index = 0; index < answerObjects.Length; index++)
             {
                 // If this is a wrong answer, hide it. Also if we are not supposed to show the correct answer, hide all the answers
-                if (index < questions[currentQuestion].answers.Length && (questions[currentQuestion].answers[index].isCorrect == false || showCorrectAnswer == false))
+                if (index < GameController.currentQuestion.options.Length && (GameController.currentQuestion.answer != index || showCorrectAnswer == false))
                 {
                     // Play the animation Hide, after the current animation is over
                     if (animationHide)
@@ -1493,7 +1430,7 @@ namespace TriviaQuizGame
                 {
                     // If this is the correct answer, highlight it and delay its animation
                     //if ( answerObjects[index].Find("Text").GetComponent<Text>().text == questions[currentQuestion].correctAnswer )
-                    if (index < questions[currentQuestion].answers.Length && questions[currentQuestion].answers[index].isCorrect == true)
+                    if (index < GameController.currentQuestion.options.Length && GameController.currentQuestion.answer == index)
                     {
                         // Highlight the correct answer
                         eventSystem.SetSelectedGameObject(answerObjects[index].gameObject);
@@ -1528,11 +1465,12 @@ namespace TriviaQuizGame
                 soundPlayTime = 0;
             }
 
+            int originPlayer = GameController.currentPlayer;
             // If we have more than one player and we are playing in turns (hotseat), go to the next player turn
             if (numberOfPlayers > 0 && playInTurns == true)
             {
-                if (currentPlayer < numberOfPlayers - 1) currentPlayer++;
-                else currentPlayer = 0;
+                if (GameController.currentPlayer < numberOfPlayers - 1) GameController.currentPlayer++;
+                else GameController.currentPlayer = 0;
             }
 
             // Clear and hide the image object
@@ -1546,7 +1484,27 @@ namespace TriviaQuizGame
             eventSystem.SetSelectedGameObject(null);
 
             // Ask the next question
-            StartCoroutine(AskQuestion(true));
+            if (!CardBuffer.extraQuestion)
+            {
+                if (GameController.nowRound > GameController.maxRound)
+                {
+                    StartCoroutine(Victory(0));
+                }
+                else
+                {
+                    SceneManager.LoadScene("qrcode_scanner");
+                }
+            }
+            else
+            {
+                CardBuffer.extraQuestion = false;
+                GameController.currentPlayer = originPlayer;
+                int nowQuestionType = GameController.currentQuestion.type;
+                CustomQuestion[] targetQuestions = Array.FindAll(GameController.questions, e => e.type == nowQuestionType);
+                int targetIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0, targetQuestions.Length));
+                GameController.currentQuestion = targetQuestions[targetIndex];
+                StartCoroutine(AskQuestion(true));
+            }
         }
 
         /// <summary>
@@ -1996,7 +1954,7 @@ namespace TriviaQuizGame
                 for (index = numberOfPlayers - 1; index >= 0; index--)
                 {
                     // Set the current player
-                    currentPlayer = index;
+                    currentPlayer = GameController.currentPlayer;
 
                     //Update the score
                     UpdateScore();
@@ -2476,97 +2434,97 @@ namespace TriviaQuizGame
             StartCoroutine(AskQuestion(false));
         }
 
-        /// <summary>
-        /// Loads an image from an online address and displays it on the relevant Image object
-        /// </summary>
-        /// <param name="imageURL"></param>
-        /// <param name="targetImage"></param>
-        /// <param name="enlargeButton"></param>
-        /// <returns></returns>
-        public IEnumerator LoadImageFromURL(string imageURL, Image targetImage, bool enlargeButton)
-        {
-            // Stop the timer while we load the image
-            timerRunning = false;
+        // /// <summary>
+        // /// Loads an image from an online address and displays it on the relevant Image object
+        // /// </summary>
+        // /// <param name="imageURL"></param>
+        // /// <param name="targetImage"></param>
+        // /// <param name="enlargeButton"></param>
+        // /// <returns></returns>
+        // public IEnumerator LoadImageFromURL(string imageURL, Image targetImage, bool enlargeButton)
+        // {
+        //     // Stop the timer while we load the image
+        //     timerRunning = false;
 
-            // Hide the sprite object while we load the image
-            targetImage.gameObject.SetActive(false);
+        //     // Hide the sprite object while we load the image
+        //     targetImage.gameObject.SetActive(false);
 
-            // Get the address of the image
-            WWW wwwLoader = new WWW(imageURL);
+        //     // Get the address of the image
+        //     WWW wwwLoader = new WWW(imageURL);
 
-            // Wait until it's loaded
-            yield return wwwLoader;
+        //     // Wait until it's loaded
+        //     yield return wwwLoader;
 
-            // Display it in the question image
-            targetImage.GetComponent<Image>().sprite = Sprite.Create(wwwLoader.texture, new Rect(0, 0, wwwLoader.texture.width, wwwLoader.texture.height), new Vector2(0, 0));
+        //     // Display it in the question image
+        //     targetImage.GetComponent<Image>().sprite = Sprite.Create(wwwLoader.texture, new Rect(0, 0, wwwLoader.texture.width, wwwLoader.texture.height), new Vector2(0, 0));
 
-            // Show the sprite object ( that holds the image )
-            targetImage.gameObject.SetActive(true);
+        //     // Show the sprite object ( that holds the image )
+        //     targetImage.gameObject.SetActive(true);
 
-            // If this is the question image, add an Enlarge button to it
-            if (enlargeButton == true)
-            {
-                // Add a button to the image, so that we can enlarge it when we click it
-                if (questionObject.GetComponent<Button>() == null) questionObject.gameObject.AddComponent<Button>();
+        //     // If this is the question image, add an Enlarge button to it
+        //     if (enlargeButton == true)
+        //     {
+        //         // Add a button to the image, so that we can enlarge it when we click it
+        //         if (questionObject.GetComponent<Button>() == null) questionObject.gameObject.AddComponent<Button>();
 
-                // Listen for a click on the button to enlarge the image in it
-                questionObject.GetComponent<Button>().onClick.AddListener(delegate () { ShowLargerImage(largerImageCanvas); });
+        //         // Listen for a click on the button to enlarge the image in it
+        //         questionObject.GetComponent<Button>().onClick.AddListener(delegate () { ShowLargerImage(largerImageCanvas); });
 
-                // Enable the button from the question, so that we can click it to open a larger image
-                if (questionObject.GetComponent<Button>()) questionObject.GetComponent<Button>().enabled = true;
+        //         // Enable the button from the question, so that we can click it to open a larger image
+        //         if (questionObject.GetComponent<Button>()) questionObject.GetComponent<Button>().enabled = true;
 
-            }
+        //     }
 
-            // Start the timer again
-            timerRunning = true;
-        }
+        //     // Start the timer again
+        //     timerRunning = true;
+        // }
 
-        /// <summary>
-        /// Loads a sound from an online address and assigns it to the relevant question/answer field
-        /// </summary>
-        /// <param name="soundURL"></param>
-        /// <param name="targetQuestion"></param>
-        /// <param name="answerObject"></param>
-        /// <param name="targetAnswer"></param>
-        /// <returns></returns>
-        public IEnumerator LoadSoundFromURL(string soundURL, Question targetQuestion, Transform answerObject, Answer targetAnswer)
-        {
-            // Stop the timer while we load the image
-            timerRunning = false;
+        // /// <summary>
+        // /// Loads a sound from an online address and assigns it to the relevant question/answer field
+        // /// </summary>
+        // /// <param name="soundURL"></param>
+        // /// <param name="targetQuestion"></param>
+        // /// <param name="answerObject"></param>
+        // /// <param name="targetAnswer"></param>
+        // /// <returns></returns>
+        // public IEnumerator LoadSoundFromURL(string soundURL, Question targetQuestion, Transform answerObject, Answer targetAnswer)
+        // {
+        //     // Stop the timer while we load the image
+        //     timerRunning = false;
 
-            // Deactivate the sound button, since it may have been hidden before
-            if (targetQuestion != null) questionObject.Find("ButtonPlaySound").gameObject.SetActive(false);
-            if (targetAnswer != null) answerObject.Find("ButtonPlaySound").gameObject.SetActive(false);
+        //     // Deactivate the sound button, since it may have been hidden before
+        //     if (targetQuestion != null) questionObject.Find("ButtonPlaySound").gameObject.SetActive(false);
+        //     if (targetAnswer != null) answerObject.Find("ButtonPlaySound").gameObject.SetActive(false);
 
-            // Get the address of the image
-            WWW wwwLoader = new WWW(soundURL);
+        //     // Get the address of the image
+        //     WWW wwwLoader = new WWW(soundURL);
 
-            // Wait until it's loaded
-            yield return wwwLoader;
+        //     // Wait until it's loaded
+        //     yield return wwwLoader;
 
-            if (targetQuestion != null)
-            {
-                // Display it in the question image
-                targetQuestion.sound = wwwLoader.GetAudioClip();
+        //     if (targetQuestion != null)
+        //     {
+        //         // Display it in the question image
+        //         targetQuestion.sound = wwwLoader.GetAudioClip();
 
-                // Activate the sound button, since it may have been hidden before
-                questionObject.Find("ButtonPlaySound").gameObject.SetActive(true);
+        //         // Activate the sound button, since it may have been hidden before
+        //         questionObject.Find("ButtonPlaySound").gameObject.SetActive(true);
 
-                // Play the sound when the question is displayed
-                if (questionLimitCount < questionLimit || questionLimit == 0) PlayQuestionSound();
-            }
+        //         // Play the sound when the question is displayed
+        //         if (questionLimitCount < questionLimit || questionLimit == 0) PlayQuestionSound();
+        //     }
 
-            if (answerObject && targetAnswer != null)
-            {
-                // Display it in the question image
-                targetAnswer.sound = wwwLoader.GetAudioClip();
+        //     if (answerObject && targetAnswer != null)
+        //     {
+        //         // Display it in the question image
+        //         targetAnswer.sound = wwwLoader.GetAudioClip();
 
-                // Activate the sound button, since it may have been hidden before
-                answerObject.Find("ButtonPlaySound").gameObject.SetActive(true);
-            }
+        //         // Activate the sound button, since it may have been hidden before
+        //         answerObject.Find("ButtonPlaySound").gameObject.SetActive(true);
+        //     }
 
-            // Start the timer again
-            timerRunning = true;
-        }
+        //     // Start the timer again
+        //     timerRunning = true;
+        // }
     }
 }

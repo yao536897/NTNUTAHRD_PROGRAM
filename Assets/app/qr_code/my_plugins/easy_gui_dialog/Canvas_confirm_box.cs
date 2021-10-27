@@ -42,7 +42,7 @@ namespace epoching.easy_gui
         public static string card_num;
         void Start()
         {
-            switch(card_num)
+            switch (card_num)
             {
                 case "John":
                     John.SetActive(true);
@@ -56,8 +56,10 @@ namespace epoching.easy_gui
                 case "Aries":
                     Aries.SetActive(true);
                     break;
+                case "Invalid":
+                    break;
                 default:
-                    AUTO.SetActive(true);
+                    // AUTO.SetActive(true);
                     break;
             }
         }
@@ -103,7 +105,7 @@ namespace epoching.easy_gui
             //go.GetComponent<Canvas_confirm_box>().confirm_btn.onClick.AddListener(test);
             Instantiate(go);
 
-           
+
         }
 
         /// <summary>
@@ -217,7 +219,7 @@ namespace epoching.easy_gui
         public void on_cancel_btn_event()
         {
             //播放音效
-           // Audio_control.instance.play_btn_sound();
+            // Audio_control.instance.play_btn_sound();
 
             //隐藏窗口
             StartCoroutine(Canvas_grounp_fade.hide(this.gameObject, true));

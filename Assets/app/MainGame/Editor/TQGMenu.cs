@@ -48,7 +48,7 @@ namespace TriviaQuizGame
 				if ( gameController.GetComponent<Category>() )    gameController.GetComponent<Category>().LoadXml(File.ReadAllText(path), false);
 
 				// Apply the changes made to the game controller ( imported questions and answers )
-				PrefabUtility.ReplacePrefab( gameController, PrefabUtility.GetPrefabParent(gameController), ReplacePrefabOptions.ConnectToPrefab);
+				// PrefabUtility.ReplacePrefab( gameController, PrefabUtility.GetPrefabParent(gameController), ReplacePrefabOptions.ConnectToPrefab);
 			}
 		}
 
@@ -79,7 +79,7 @@ namespace TriviaQuizGame
 				if ( gameController.GetComponent<Category>() )    gameController.GetComponent<Category>().LoadXml(File.ReadAllText(path), true);
 				
 				// Apply the changes made to the game controller ( imported questions and answers )
-				PrefabUtility.ReplacePrefab( gameController, PrefabUtility.GetPrefabParent(gameController), ReplacePrefabOptions.ConnectToPrefab);
+				// PrefabUtility.ReplacePrefab( gameController, PrefabUtility.GetPrefabParent(gameController), ReplacePrefabOptions.ConnectToPrefab);
 			}
 		}
 
