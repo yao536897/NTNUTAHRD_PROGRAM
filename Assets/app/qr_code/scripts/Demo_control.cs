@@ -35,6 +35,8 @@ namespace epoching.easy_qr_code
         public GameObject game_obj_generate_qr_code;
         //public GameObject ImageA;
 
+        public GameObject hint;
+
         public DialogPlugin[] dialogPlugins = new DialogPlugin[0];
 
         void Awake()
@@ -47,14 +49,15 @@ namespace epoching.easy_qr_code
         void Start()
         {
 
-            // new WebCamTexture(WebCamTexture.devices[0].name);
-            // Screen.orientation = ScreenOrientation.Portrait;
+            new WebCamTexture(WebCamTexture.devices[0].name);
+            Screen.orientation = ScreenOrientation.Portrait;
 
             // QuestionContainer questionContainer = JsonUtility.FromJson<QuestionContainer>(questionJson.text);
             // GameController.questions = questionContainer.data;
 
             //WebCamTexture cam_texture = new WebCamTexture();
             //cam_texture.Play();
+            if (CardBuffer.sleeping == -2) hint.SetActive(true);
         }
 
         public void change_to_main()
@@ -106,14 +109,22 @@ namespace epoching.easy_qr_code
             //         break;
             //     case Game_Status.Gaming:
             //         // this.change_to_read_qr_code();
-            //         // int questionType = Array.IndexOf(questionCard, "Color2");
-            //         // CustomQuestion[] targetQuestions = Array.FindAll(GameController.questions, e => e.type == questionType);
-            //         // int targetIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0, targetQuestions.Length));
-            //         // GameController.currentQuestion = targetQuestions[targetIndex];
-
+            //         int questionType = Array.IndexOf(questionCard, "Color2");
+            //         CustomQuestion[] targetQuestions = Array.FindAll(GameController.questions, e => e.type == questionType);
+            //         int targetIndex = Mathf.FloorToInt(UnityEngine.Random.Range(0, targetQuestions.Length));
+            //         GameController.currentQuestion = targetQuestions[targetIndex];
             //         // SceneManager.LoadScene("CS_GameHotseat");
 
-            //         randomEvent();
+            //         // randomEvent();
+
+            //         // CardBuffer.extraQuestion = true;
+            //         // SceneManager.LoadScene("CS_GameHotseat");
+
+            //         // CardBuffer.forceGameOver = true;
+            //         // SceneManager.LoadScene("CS_GameHotseat");
+
+            //         CardBuffer.sleeping = 2;
+            //         SceneManager.LoadScene("CS_GameHotseat");
             //         break;
             // }
             this.change_to_read_qr_code();

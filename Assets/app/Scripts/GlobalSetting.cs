@@ -31,6 +31,13 @@ namespace GlobalSetting
         public static CustomQuestion currentQuestion = new CustomQuestion();
         public static int maxRound = 1;
         public static int nowRound = 1;
+        public static CardBuffer cardBuffer = new CardBuffer();
+    }
+
+    public class CardBuffer {
+        public static int sleeping = -1;
+        public static bool extraQuestion = false;
+        public static bool forceGameOver = false;
     }
 
     [System.Serializable]
@@ -65,6 +72,7 @@ namespace GlobalSetting
     {
         None,
         SelectCharacter,
-        Gaming
+        Gaming,
+        Card
     }
 }
